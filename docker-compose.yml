@@ -1,0 +1,34 @@
+version: '3.8'
+
+networks:
+  my-network:
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: supplies-db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./storage/postgresql:/var/lib/postgresql
+    networks:
+      - my-network
+  fulfillment-center:
+    image: fulfillment-center
+    container_name: fulfillment-center
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/supplies-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+    networks:
+      - my-network
